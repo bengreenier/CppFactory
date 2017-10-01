@@ -49,7 +49,7 @@ namespace CppFactory
 		/// <param name="alloc">Function that allocates an object</param>
 		/// <param name="zone">Zone allocator applies to</param>
 		/// <example>
-		/// Object<TObject>::RegisterAllocator([] { return std::make_shared<TObject>(); });
+		/// Object&lt;TObject&gt;::RegisterAllocator([] { return std::make_shared<TObject>(); });
 		/// </example>
 		static void RegisterAllocator(const std::function<std::shared_ptr<TObject>()>& alloc, int zone = 0)
 		{
@@ -60,7 +60,7 @@ namespace CppFactory
 		/// Unregisters all allocators for all zones for type <c>TObject</c>
 		/// </summary>
 		/// <example>
-		/// Object<TObject>::UnregisterAllocator();
+		/// Object&lt;TObject&gt;::UnregisterAllocator();
 		/// </example>
 		static void UnregisterAllocator()
 		{
@@ -72,7 +72,7 @@ namespace CppFactory
 		/// </summary>
 		/// <param name="zone">The zone to unregister</param>
 		/// <example>
-		/// Object<TObject>::UnregisterAllocator(10);
+		/// Object&lt;TObject&gt;::UnregisterAllocator(10);
 		/// </example>
 		static void UnregisterAllocator(int zone)
 		{
@@ -88,7 +88,7 @@ namespace CppFactory
 		/// This is only valid when <c>TObjLifecycle</c> is <c>ObjectLifecycle::Global</c>
 		/// </remarks>
 		/// <example>
-		/// Object<TObject>::RemoveGlobal(10);
+		/// Object&lt;TObject&gt;::RemoveGlobal(10);
 		/// </example>
 		static void RemoveGlobal(int zone)
 		{
@@ -106,7 +106,7 @@ namespace CppFactory
 		/// This is only valid when <c>TObjLifecycle</c> is <c>ObjectLifecycle::Global</c>
 		/// </remarks>
 		/// <example>
-		/// Object<TObject>::RemoveGlobal();
+		/// Object&lt;TObject&gt;::RemoveGlobal();
 		/// </example>
 		static void RemoveGlobal()
 		{
@@ -141,7 +141,12 @@ namespace CppFactory
 			// if we have a custom allocator use it
 			if (m_allocFunc.find(zone) == m_allocFunc.end())
 			{
-				obj = std::make_shared<TObject>();
+				// TODO(bengreenier): support not default ctors
+				//
+				// If compilation is failing here, you may have a ctor with parameters or a non-public ctor
+				// Non-public: add `friend Object<TObject>;`
+				// Parameters: not supported yet
+				obj = std::shared_ptr<TObject>(new TObject());
 			}
 			else
 			{

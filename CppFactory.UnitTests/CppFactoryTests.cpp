@@ -28,10 +28,16 @@ namespace CppFactoryUnitTests
 	{
 	public:
 
+		TEST_CLASS_INITIALIZE(InitC)
+		{
+			//std::this_thread::sleep_for(std::chrono::seconds::duration(20));
+		}
+
 		TEST_METHOD_INITIALIZE(Init)
 		{
 			// removes all custom allocators
 			Object<Data>::UnregisterAllocator();
+			Object<Data, ObjectLifecycle::Global>::UnregisterAllocator();
 
 			// removes all globals
 			Object<Data, ObjectLifecycle::Global>::RemoveGlobal();
@@ -171,6 +177,10 @@ namespace CppFactoryUnitTests
 			}
 		}
 
+		BEGIN_TEST_METHOD_ATTRIBUTE(Timings)
+			TEST_IGNORE()
+		END_TEST_METHOD_ATTRIBUTE()
+
 		TEST_METHOD(Timings)
 		{
 			int iterations = 10 * 1000;
@@ -185,7 +195,7 @@ namespace CppFactoryUnitTests
 				auto end = std::chrono::system_clock::now();
 
 				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-				Logger::WriteMessage((L"Untracked, normal alloc: " + std::to_wstring(ms) + L"ms (" + std::to_wstring(ms / (float)iterations) + L"s / iteration)").c_str());
+				Logger::WriteMessage((L"Untracked, normal alloc: " + std::to_wstring(ms) + L"ms (" + std::to_wstring(ms / (float)iterations) + L"ms / iteration)").c_str());
 			}
 
 			Logger::WriteMessage(L"\r\n");
@@ -203,7 +213,7 @@ namespace CppFactoryUnitTests
 				auto end = std::chrono::system_clock::now();
 
 				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-				Logger::WriteMessage((L"Global, normal alloc: " + std::to_wstring(ms) + L"ms (" + std::to_wstring(ms / (float)iterations) + L"s / iteration)").c_str());
+				Logger::WriteMessage((L"Global, normal alloc: " + std::to_wstring(ms) + L"ms (" + std::to_wstring(ms / (float)iterations) + L"ms / iteration)").c_str());
 			}
 			
 			Logger::WriteMessage(L"\r\n");
@@ -231,7 +241,7 @@ namespace CppFactoryUnitTests
 				auto end = std::chrono::system_clock::now();
 
 				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-				Logger::WriteMessage((L"Untracked, slow alloc: " + std::to_wstring(ms) + L"ms (" + std::to_wstring(ms / (float)iterations) + L"s / iteration)").c_str());
+				Logger::WriteMessage((L"Untracked, slow alloc: " + std::to_wstring(ms) + L"ms (" + std::to_wstring(ms / (float)iterations) + L"ms / iteration)").c_str());
 			}
 
 			Logger::WriteMessage(L"\r\n");
@@ -261,7 +271,7 @@ namespace CppFactoryUnitTests
 				auto end = std::chrono::system_clock::now();
 
 				auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-				Logger::WriteMessage((L"Global, slow alloc: " + std::to_wstring(ms) + L"ms (" + std::to_wstring(ms / (float)iterations) + L"s / iteration)").c_str());
+				Logger::WriteMessage((L"Global, slow alloc: " + std::to_wstring(ms) + L"ms (" + std::to_wstring(ms / (float)iterations) + L"ms / iteration)").c_str());
 			}
 		}
 	};
