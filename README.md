@@ -4,7 +4,7 @@ Modern c++ object factory implementation in <200 lines :package: :factory:
 
 ![build status](https://b3ngr33ni3r.visualstudio.com/_apis/public/build/definitions/47f8d118-934e-48ed-82d8-52d850a66d71/2/badge)
 
-I needed a simple to use, easy to mock c++ factory library (that could be used for dependecy injection) and a quick search didn't yield what I was looking for. So I built this one. Read the API docs - ([raw](./Docs)) - ([hosted](#not-yet)).
+I needed a simple to use, easy to mock c++ factory library (that could be used for dependecy injection) and a quick search didn't yield what I was looking for. So I built this one. Read the API docs - ([raw](./Docs)) - ([hosted](https://bengreenier.github.io/CppFactory)).
 
 ## Concepts
 
