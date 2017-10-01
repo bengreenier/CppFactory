@@ -141,7 +141,12 @@ namespace CppFactory
 			// if we have a custom allocator use it
 			if (m_allocFunc.find(zone) == m_allocFunc.end())
 			{
-				obj = std::make_shared<TObject>();
+				// TODO(bengreenier): support not default ctors
+				//
+				// If compilation is failing here, you may have a ctor with parameters or a non-public ctor
+				// Non-public: add friend Object<TObject>;
+				// Parameters: not supported yet
+				obj = std::shared_ptr<TObject>(new TObject());
 			}
 			else
 			{
