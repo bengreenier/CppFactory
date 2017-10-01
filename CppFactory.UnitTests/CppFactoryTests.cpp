@@ -28,11 +28,6 @@ namespace CppFactoryUnitTests
 	{
 	public:
 
-		TEST_CLASS_INITIALIZE(InitC)
-		{
-			//std::this_thread::sleep_for(std::chrono::seconds::duration(20));
-		}
-
 		TEST_METHOD_INITIALIZE(Init)
 		{
 			// removes all custom allocators
