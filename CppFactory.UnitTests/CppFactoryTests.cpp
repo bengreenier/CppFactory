@@ -28,10 +28,16 @@ namespace CppFactoryUnitTests
 	{
 	public:
 
+		TEST_CLASS_INITIALIZE(InitC)
+		{
+			//std::this_thread::sleep_for(std::chrono::seconds::duration(20));
+		}
+
 		TEST_METHOD_INITIALIZE(Init)
 		{
 			// removes all custom allocators
 			Object<Data>::UnregisterAllocator();
+			Object<Data, ObjectLifecycle::Global>::UnregisterAllocator();
 
 			// removes all globals
 			Object<Data, ObjectLifecycle::Global>::RemoveGlobal();
@@ -177,7 +183,7 @@ namespace CppFactoryUnitTests
 
 		TEST_METHOD(Timings)
 		{
-			int iterations = 1000;
+			int iterations = 10 * 1000;
 
 			// block scope for no re-use
 			{
