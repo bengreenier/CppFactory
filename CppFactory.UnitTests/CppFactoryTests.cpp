@@ -177,7 +177,7 @@ namespace CppFactoryUnitTests
 
 		TEST_METHOD(Timings)
 		{
-			int iterations = 10 * 1000;
+			int iterations = 1000;
 
 			// block scope for no re-use
 			{
