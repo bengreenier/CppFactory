@@ -27,20 +27,13 @@ namespace CppFactoryUnitTests
 	TEST_CLASS(ObjectTests)
 	{
 	public:
-
-		TEST_CLASS_INITIALIZE(InitC)
-		{
-			//std::this_thread::sleep_for(std::chrono::seconds::duration(20));
-		}
-
 		TEST_METHOD_INITIALIZE(Init)
 		{
 			// removes all custom allocators
 			Object<Data>::UnregisterAllocator();
-			Object<Data, ObjectLifecycle::Global>::UnregisterAllocator();
 
 			// removes all globals
-			Object<Data, ObjectLifecycle::Global>::RemoveGlobal();
+			GlobalObject<Data>::Reset();
 		}
 
 		TEST_METHOD(Default_Success)
@@ -77,18 +70,18 @@ namespace CppFactoryUnitTests
 		
 		TEST_METHOD(ArbitraryZone_Success)
 		{
-			Assert::AreEqual<int>(10, Object<Data>::Get(12345)->Value);
-			Assert::AreEqual<int>(20, Object<Data>::Get(12345)->Value2);
-			Assert::AreEqual<int>(10, Object<Data>::Get(TestZones::ZoneOne)->Value);
-			Assert::AreEqual<int>(20, Object<Data>::Get(TestZones::ZoneOne)->Value2);
-			Assert::AreEqual<int>(10, Object<Data>::Get(TestZones::ZoneTwo)->Value);
-			Assert::AreEqual<int>(20, Object<Data>::Get(TestZones::ZoneTwo)->Value2);
+			Assert::AreEqual<int>(10, Object<Data>::Get<12345>()->Value);
+			Assert::AreEqual<int>(20, Object<Data>::Get<12345>()->Value2);
+			Assert::AreEqual<int>(10, Object<Data>::Get<TestZones::ZoneOne>()->Value);
+			Assert::AreEqual<int>(20, Object<Data>::Get<TestZones::ZoneOne>()->Value2);
+			Assert::AreEqual<int>(10, Object<Data>::Get<TestZones::ZoneTwo>()->Value);
+			Assert::AreEqual<int>(20, Object<Data>::Get<TestZones::ZoneTwo>()->Value2);
 		}
 
 		TEST_METHOD(PerZoneAlloc_Success)
 		{
 			// write an allocator for zone 10
-			Object<Data>::RegisterAllocator([] {
+			Object<Data>::RegisterAllocator<10>([] {
 				// custom alloc
 				auto ptr = (Data*)malloc(sizeof(Data));
 				ptr->Value = 0;
@@ -96,37 +89,36 @@ namespace CppFactoryUnitTests
 
 				// custom dealloc
 				return std::shared_ptr<Data>(ptr, [](Data* data) { free(data); });
-			}, 10);
+			});
 
 			// assert default zone
 			Assert::AreEqual<int>(10, Object<Data>::Get()->Value);
 			Assert::AreEqual<int>(20, Object<Data>::Get()->Value2);
 
 			// assert zone 10
-			Assert::AreEqual<int>(0, Object<Data>::Get(10)->Value);
-			Assert::AreEqual<int>(0, Object<Data>::Get(10)->Value2);
+			Assert::AreEqual<int>(0, Object<Data>::Get<10>()->Value);
+			Assert::AreEqual<int>(0, Object<Data>::Get<10>()->Value2);
 		}
 
 		TEST_METHOD(GlobalLifecycle_Success)
 		{
-			// note: these could be simplified to just `Global`
-			Assert::AreEqual<int>(10, Object<Data, ObjectLifecycle::Global>::Get()->Value);
-			Assert::AreEqual<int>(20, Object<Data, ObjectLifecycle::Global>::Get()->Value2);
+			Assert::AreEqual<int>(10, GlobalObject<Data>::Get()->Value);
+			Assert::AreEqual<int>(20, GlobalObject<Data>::Get()->Value2);
 
-			Object<Data, ObjectLifecycle::Global>::Get()->Value = 100;
-			Object<Data, ObjectLifecycle::Global>::Get()->Value2 = 200;
+			GlobalObject<Data>::Get()->Value = 100;
+			GlobalObject<Data>::Get()->Value2 = 200;
 
-			Assert::AreEqual<int>(100, Object<Data, ObjectLifecycle::Global>::Get()->Value);
-			Assert::AreEqual<int>(200, Object<Data, ObjectLifecycle::Global>::Get()->Value2);
+			Assert::AreEqual<int>(100, GlobalObject<Data>::Get()->Value);
+			Assert::AreEqual<int>(200, GlobalObject<Data>::Get()->Value2);
 		}
 
 		TEST_METHOD(RefCount_Verify)
 		{
 			// should be just us for untracked
-			Assert::AreEqual<long>(1, Object<Data, ObjectLifecycle::Untracked>::Get().use_count());
+			Assert::AreEqual<long>(1, Object<Data>::Get().use_count());
 
 			// should be us and the object manager for global
-			Assert::AreEqual<long>(2, Object<Data, ObjectLifecycle::Global>::Get().use_count());
+			Assert::AreEqual<long>(2, GlobalObject<Data>::Get().use_count());
 		}
 
 		TEST_METHOD(Destructor_Verify)
@@ -154,7 +146,7 @@ namespace CppFactoryUnitTests
 			// block scope for Global
 			{
 				bool dealloc = false;
-				Object<Data, ObjectLifecycle::Global>::RegisterAllocator([&] {
+				Object<Data>::RegisterAllocator([&] {
 					// custom alloc
 					auto ptr = (Data*)malloc(sizeof(Data));
 					ptr->Value = 0;
@@ -166,12 +158,12 @@ namespace CppFactoryUnitTests
 
 				// retrieval scope
 				{
-					Object<Data, ObjectLifecycle::Global>::Get();
+					GlobalObject<Data>::Get();
 				}
 
 				Assert::IsFalse(dealloc);
 
-				Object<Data, ObjectLifecycle::Global>::RemoveGlobal();
+				GlobalObject<Data>::Reset();
 
 				Assert::IsTrue(dealloc);
 			}
@@ -206,9 +198,9 @@ namespace CppFactoryUnitTests
 
 				for (auto i = 0; i < iterations; ++i)
 				{
-					Object<Data, ObjectLifecycle::Global>::Get();
+					GlobalObject<Data>::Get();
 				}
-				Object<Data, ObjectLifecycle::Global>::RemoveGlobal();
+				GlobalObject<Data>::Reset();
 
 				auto end = std::chrono::system_clock::now();
 
@@ -248,7 +240,7 @@ namespace CppFactoryUnitTests
 
 			// block scope for slow allocator, re-use
 			{
-				Object<Data, ObjectLifecycle::Global>::RegisterAllocator([] {
+				Object<Data>::RegisterAllocator([] {
 					// custom alloc
 					auto ptr = (Data*)malloc(sizeof(Data));
 					ptr->Value = 0;
@@ -264,9 +256,9 @@ namespace CppFactoryUnitTests
 				auto start = std::chrono::system_clock::now();
 				for (auto i = 0; i < iterations; ++i)
 				{
-					Object<Data, ObjectLifecycle::Global>::Get();
+					GlobalObject<Data>::Get();
 				}
-				Object<Data, ObjectLifecycle::Global>::RemoveGlobal();
+				GlobalObject<Data>::Reset();
 
 				auto end = std::chrono::system_clock::now();
 

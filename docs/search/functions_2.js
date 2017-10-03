@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['unregisterallocator',['UnregisterAllocator',['../class_cpp_factory_1_1_object.html#a50e8355bb2cb47cf29028b407548a66a',1,'CppFactory::Object::UnregisterAllocator()'],['../class_cpp_factory_1_1_object.html#a759a187aff184604c2f12fab8e3037e6',1,'CppFactory::Object::UnregisterAllocator(int zone)']]]
+  ['unregisterallocator',['UnregisterAllocator',['../class_cpp_factory_1_1_object.html#ae7fd2e24446b4793d1ab4fdcccd27ec9',1,'CppFactory::Object::UnregisterAllocator()'],['../class_cpp_factory_1_1_object.html#ae6ca63d5828f51c3f74ec91339e3e7de',1,'CppFactory::Object::UnregisterAllocator()']]]
 ];
