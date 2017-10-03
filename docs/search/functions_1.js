@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['registerallocator',['RegisterAllocator',['../class_cpp_factory_1_1_object.html#a792f1a3c52ee942c066c7ab4f5980ae3',1,'CppFactory::Object']]],
-  ['removeglobal',['RemoveGlobal',['../class_cpp_factory_1_1_object.html#a68b0af944abffd948c767e2fabe8572a',1,'CppFactory::Object::RemoveGlobal(int zone)'],['../class_cpp_factory_1_1_object.html#ad6d43fc881f904e09a28d2acd3d22301',1,'CppFactory::Object::RemoveGlobal()']]]
+  ['registerallocator',['RegisterAllocator',['../class_cpp_factory_1_1_object.html#aa8ed9ed528bf9dcbbcb873af98cbcb18',1,'CppFactory::Object']]],
+  ['reset',['Reset',['../class_cpp_factory_1_1_global_object.html#a7a303054d32712416dee20d7af68debf',1,'CppFactory::GlobalObject::Reset()'],['../class_cpp_factory_1_1_global_object.html#ae79d6ed0ff9dcca3790c9b141ff1e044',1,'CppFactory::GlobalObject::Reset()']]]
 ];

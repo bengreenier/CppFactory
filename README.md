@@ -14,22 +14,22 @@ I needed a simple to use, easy to mock c++ factory library (that could be used f
 
 In CppFactory, objects are all captured in `std::shared_ptr` wrappers, so there is no need to worry about manually deleting objects that you retrieve via the `Object<TObject>::Get()` call. However, you may choose to modify how the runtime handles object allocation to optimize for your use case.
 
-By default, all objects are `ObjectLifecycle::Untracked` which means there is no internal management of objects, and when the object returned (by `Object<TObject>::Get()`) falls out of scope it is destroyed. This works great for object types that are not re-used. However, for something with a longer life (perhaps a representation of a database connection) you may specify `ObjectLifecycle::Global`. This tells CppFactory that you wish to keep a reference to the object inside the factory, and that on subsequent requests the factory should return the same object. This looks like the following:
+By default, `Object`s are unmanaged, meaning when the object returned (by `Object<TObject>::Get()`) falls out of scope it is destroyed. This works great for object types that are not re-used (or if you wish to manage lifetime yourself). However, for something with a longer life (perhaps a representation of a database connection) that will be reused in many places, you may use a `GlobalObject`. `GlobalObject`s are powered by `Object`s under the hood, meaning that you can still configure allocators at the `Object` level. All `GlobalObject` provides is a lightweight caching wrapper around the `Object<TObject>::Get()` method. This looks like the following:
 
 ```
-Object<TObject, ObjectLifecycle::Global>::Get()
+GlobalObject<TObject>::Get()
 ```
 
-Note that you may also explicitly specify `ObjectLifecycle::Untracked`, even though it is the default.
+To clear the `GlobalObject` cache, simply call `GlobalObject<TObject>::Reset()` or (to reset only a single zone, for example `10`) `GlobalObject<TObject>::Reset<10>()`.
 
 ### Object Zones
 
 In CppFactory, objects of the same type are all retrieved from the same factory, so it can become difficult to work with different instances of the same type. To deal with this, CppFactory provides a concept of zones.
 
-Zones enable you to draw logical boundries throughout your codebase and to retrieve instances only for that zone. To represent this, you may pass an `int` to `Get()`, `RegisterAllocator()` and `RemoveGlobal()` as a parameter. The int is how CppFactory represents a zone, and tracks object allocation within that zone. Here's an example:
+Zones enable you to draw logical boundries throughout your codebase and to retrieve instances only for that zone. To represent this, you may pass an `int` to `Get()`, `RegisterAllocator()` and `RemoveGlobal()` as a template parameter. The int is how CppFactory represents a zone, and tracks object allocation within that zone. Here's an example:
 
 ```
-Object<TObject>::Get(10)
+Object<TObject>::Get<10>()
 ```
 
 You may also use an `enum` (backed by an `int`) to represent zones, which looks like the following:
@@ -41,10 +41,10 @@ enum Zones
     ZoneTwo
 }
 
-Object<TObject>::Get(Zones::ZoneOne)
+Object<TObject>::Get<Zones::ZoneOne>()
 ```
 
-Note that you'll likely find this most useful when coupled with `ObjectLifecycle::Global`.
+Note that you'll likely find this most useful when coupled with `GlobalObject`.
 
 ## Usage
 
@@ -65,6 +65,9 @@ int main()
     // using default allocator (ctor)
     std::shared_ptr<Data> object = Object<Data>::Get();
     object->Value = 2;
+
+    // a global object using the default allocator (ctor)
+    std::shared_ptr<Data> global = GlobalObject<Data>::Get();
 
     return 0;
 }
@@ -97,6 +100,9 @@ int main()
     std::shared_ptr<Data> object = Object<Data>::Get();
     object->Value = 2;
 
+    // a global object using the allocator
+    std::shared_ptr<Data> global = GlobalObject<Data>::Get();
+
     return 0;
 }
 ```
@@ -105,13 +111,13 @@ See [the tests](./CppFactory.UnitTests/CppFactoryTests.cpp) for more examples.
 
 ## Timing
 
-> Note: Test runs `10000` iterations for each type below. See the code [here](./CppFactory.UnitTests/CppFactoryTests.cpp#L174).
+> Note: Test runs `10000` iterations for each type below. See the code [here](./CppFactory.UnitTests/CppFactoryTests.cpp#L176).
 
 ```
-Untracked, normal alloc: 26ms (0.002600s / iteration)
-Global, normal alloc: 32ms (0.003200s / iteration)
-Untracked, slow alloc: 105181ms (10.518100s / iteration)
-Global, slow alloc: 43ms (0.004300s / iteration)
+Untracked, normal alloc: 34ms (0.003400ms / iteration)
+Global, normal alloc: 36ms (0.003600ms / iteration)
+Untracked, slow alloc: 110694ms (11.069400ms / iteration)
+Global, slow alloc: 62ms (0.006200ms / iteration)
 ```
 
 ## License
