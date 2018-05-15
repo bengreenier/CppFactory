@@ -18,10 +18,56 @@ namespace CppFactoryUnitTests
 		Data() : Value(10), Value2(20) {}
 	};
 
+	struct DataArgs
+	{
+	public:
+		int Value;
+		int Value2;
+
+		DataArgs(int value, int value2) : Value(value), Value2(value2) {}
+	};
+
+	class CustomFactory : public Factory<DataArgs, int, int>
+	{
+	};
+
 	enum TestZones
 	{
 		ZoneOne,
 		ZoneTwo
+	};
+
+	TEST_CLASS(FactoryTests)
+	{
+	public:
+		TEST_METHOD(FactoryDefault_Success)
+		{
+			Factory<Data> factory;
+			Assert::AreEqual<int>(10, factory.Allocate()->Value);
+			Assert::AreEqual<int>(20, factory.Allocate()->Value2);
+		}
+
+		TEST_METHOD(FactoryArgs_Success)
+		{
+			Factory<DataArgs, int, int> factory;
+
+			// doesn't compile
+			//factory.Allocate()->Value;
+
+			Assert::AreEqual<int>(10, factory.Allocate(10, 20)->Value);
+			Assert::AreEqual<int>(20, factory.Allocate(10, 20)->Value2);
+		}
+
+		TEST_METHOD(CustomFactory_Success)
+		{
+			CustomFactory factory;
+
+			// doesn't compile
+			//factory.Allocate()->Value;
+
+			Assert::AreEqual<int>(10, factory.Allocate(10, 20)->Value);
+			Assert::AreEqual<int>(20, factory.Allocate(10, 20)->Value2);
+		}
 	};
 
 	TEST_CLASS(ObjectTests)

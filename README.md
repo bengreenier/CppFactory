@@ -107,6 +107,58 @@ int main()
 }
 ```
 
+Using factory object pattern (old school):
+
+```
+#include <CppFactory/CppFactory.hpp>
+
+using namespace CppFactory;
+
+struct Data
+{
+    int Value;
+};
+
+int main()
+{
+    Factory<Data> factory;
+
+    // use defined allocator
+    std::shared_ptr<Data> object = factory.Allocate();
+    object->Value = 2;
+
+    return 0;
+}
+```
+
+Using factory object pattern (custom factory):
+
+```
+#include <CppFactory/CppFactory.hpp>
+
+using namespace CppFactory;
+
+struct DataArgs
+{
+    int Value;
+    int Value2;
+
+    DataArgs(int value, int value2) : Value(value), Value2(value2) {}
+};
+
+int main()
+{
+    Factory<DataArgs, int, int> factory;
+
+    // use defined allocator
+    std::shared_ptr<Data> object = factory.Allocate(10, 20);
+    // object->Value == 10;
+    // object->Value2 == 20;
+
+    return 0;
+}
+```
+
 See [the tests](./CppFactory.UnitTests/CppFactoryTests.cpp) for more examples.
 
 ## Timing
